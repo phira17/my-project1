@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local Online Ekub System</title>
+    <style>
+        * { box-sizing: border-box;
+         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          margin: 0; 
+          padding: 0; }
+        body { background-color: #51249f; 
+        color: #333;
+         min-height: 100vh; 
+         padding-bottom: 40px; }
+        
+        /* Brand Header */
+        header { background: #2e7d32;
+         color: lch(100% 0.01 296.81); 
+         padding: 25px 20px; 
+         text-align: center; }
+        header h1 { font-size: 28px;
+         margin-bottom: 5px; }
+        header p { font-size: 15px; 
+        opacity: 0.9; }
+
+        /* Navigation Bar & Language Controller */
+        nav { background: #a6c4de;
+         display: flex;
+          justify-content: space-between; 
+          align-items: center;
+           box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+           padding: 0 20px;
+            position: sticky; top: 0;
+            z-index: 1000; }
+        .nav-links { display: flex;
+         justify-content: center;
+          flex-grow: 1; }
+        nav a { color: white; 
+        text-decoration: none; 
+        padding: 15px 20px; ,
+        font-weight: 600; 
+        font-size:15px; 
+        transition: background 0.2s;
+         cursor: pointer; }
+        nav a:hover, nav a.active { background: #2e7d32; }
+        .lang-picker-box { display: flex;
+             align-items: center; 
+             gap: 8px;
+              color: white;
+               font-weight: bold; 
+               font-size: 14px; }
+        .lang-select { background: #2e7d32; 
+            color: white; 
+            border: 1px solid #81c784; 
+            padding: 6px 10px;
+             border-radius: 4px; 
+             font-weight: bold; 
+             cursor: pointer; }
+        
+        @media (max-width: 768px) {
+            nav { flex-direction: column; 
+                padding: 10px; }
+            .nav-links { flex-direction: column; 
+                width: 100%; text-align: center; }
+            .lang-picker-box { margin-top: 10px; }
+        }
+
+        /* Content Sections Wrapper */
+        .content-section { display: none;
+             max-width: 1400px; 
+             margin: 25px auto; 
+             padding: 0 20px; 
+             animation: fadeIn 0.4s ease-in-out; }
+        .content-section.active-section { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Grid Layouts */
+        .main-container { display: grid; grid-template-columns: 1fr 1.3fr; gap: 20px; width: 100%; }
+        @media (max-width: 992px) { .main-container { grid-template-columns: 1fr; } }
+        
+        /* Card Layout */
+        .card { background: white;
+             padding: 25px;
+              border-radius: 8px;
+               box-shadow: 0 4px 6px rgba(0,0,0,0.05); 
+               margin-bottom: 20px; }
+        h2 { margin-bottom: 15px;
+             color: #2e7d32;
+              border-bottom: 2px solid #e8f5e9;
+               padding-bottom: 5px; font-size: 22px; }
+        h3 { color: #2e7d32;
+             margin-bottom: 10px; 
+             font-size: 18px; }
+        p { line-height: 1.6; 
+            color: #555; margin-bottom: 15px; }
+
+        /* Form Controls */
+        .form-row-3 { display: grid;
+             grid-template-columns: 1fr 1fr 1fr;
+              gap: 10px; }
+        .form-row-2 { display: grid; 
+            grid-template-columns: 1fr 1fr; gap: 10px; }
+        @media (max-width: 600px) { .form-row-3, .form-row-2 { grid-template-columns: 
+            1fr; gap: 0; } }
+        .form-group { margin-bottom: 15px; }
+        label { display: block;
+             margin-bottom: 5px;
+              font-weight: 600;
+               font-size: 14px; }
+        input, select, textarea { width: 100%; 
+            padding: 10px; 
+            border: 1px solid #ccc;
+             border-radius: 4px; 
+             font-size: 15px; }
+        input:focus, select:focus, textarea:focus { outline: none; .
+            border-color: #2e7d32; }
+        textarea { resize: vertical; min-height: 100px; }
+
+        /* Rule Warning Banner Style */
+        .deadline-banner { background: #e3f2fd; 
+            color: #0d47a1;
+             padding: 12px;
+              border-radius: 4px;
+               border: 1px solid #bbdefb; 
+               font-size: 13px; 
+               font-weight: 600;
+                margin-bottom: 15px; 
+                display: flex;
+                 align-items: center;
+                  gap: 8px; }
+
+        /* Penalty Component Alert Styles */
+        .penalty-status-alert { display: flex; 
+            align-items: center; 
+            gap: 10px;
+             background: #fff3e0;
+              padding: 12px;
+               border-radius: 4px; 
+               border: 1px dashed #ffb74d;
+                margin-bottom: 15px;
+                 font-weight: bold; 
+                 font-size: 14px; }
+        .penalty-status-alert.active-fine { background: #eeebff; 
+            border-color: #ef9a9a; color: #c62828; }
+        .penalty-status-alert.good-standing { background: #e8f5e9; 
+            border-color: #a5d6a7;
+             color: #2e7d32; }
+        .hint { font-size: 12px; color: #666;
+             margin-top: 3px; display: block; }
+        
+        button { width: 100%;
+             background: #2e7d32; color: white;
+              border: none; padding: 12px; 
+              font-size: 16px;
+               font-weight: bold; 
+               border-radius: 4px;
+                cursor: pointer; 
+                transition: background 0.2s; }
+        button:hover { background: #1b5e20; }
+        
+        .summary-box { background: #e8f5e9;
+             border-left: 4px solid #2e7d32;
+              padding: 12px; margin-top: 10px; 
+              border-radius: 0 4px 4px 0; }
+        .summary-box .summary-item { display: flex;
+             justify-content: space-between;
+              margin-bottom: 5px; font-size: 14px; }
+        .summary-box .summary-item.total { border-top: 1px solid #c8e6c9;
+             padding-top: 5px;
+              margin-top: 5px;
+               font-weight: bold; 
+               font-size: 16px; }
+        .penalty-txt { color: #d32f2f;
+             font-weight: bold; }
+
+        /* Admin Layout Grid */
+        .admin-section { background: #263238;
+             color: #eceff1; }
+        .admin-section h2 { color: #81c784; 
+            border-bottom-color: #37474f; }
+        .alarm-banner { background: #d32f2f;
+             color: white; padding: 15px; 
+             border-radius: 4px;
+              font-weight: bold; 
+              text-align: center;
+               margin-bottom: 15px;
+                display: none;
+                 animation: blink 1s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
+        
+        /* Email Dispatch Simulator Board */
+        .email-simulator-card { background: #1e262b; 
+            border: 1px solid #37474f; 
+            padding: 12px;
+             border-radius: 4px;
+              margin-top: 15px; 
+              display: none; }
+        .email-header-line { font-family: monospace;
+             font-size: 12px; 
+             color: #b0bec5;
+              margin-bottom: 4px; }
+        .email-body-box { background: #11171a;
+             padding: 10px;
+              border-left: 3px solid #64b5f6; 
+              font-family: monospace; 
+              font-size: 13px;
+               color: #fff;
+                white-space: pre-wrap; 
+                margin-top: 5px; }
+
+        /* Table Structure */
+        table { width: 100%;
+             border-collapse: collapse; 
+             margin-top: 10px; 
+             font-size: 13px;
+              background: #37474f;
+               color: white; }
+        th, td { padding: 10px; text-align: left;
+             border-bottom: 1px solid #455a64; }
+        th { background: #1c272c;
+             color: #81c784; }
+        tr:hover { background: #455a64; }
+        .secondary-info { font-size: 11px; 
+            color: #b0bec5;
+             display: block;
+              margin-top: 2px; }
+        .badge { padding: 2px 6px; 
+            border-radius: 3px; 
+            font-size: 11px; 
+            font-weight: bold; 
+            text-transform: uppercase; }
+        .badge.danger { background: #d32f2f;
+             color: white; }
+        .badge.success { background: #2e7d32;
+             color: white; }
+
+        /* Info Grid Layouts */
+        .info-grid { display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+             gap: 20px; margin-top: 15px; }
+        .feature-icon { font-size: 24px; 
+            margin-bottom: 8px;
+             display: inline-block; }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1 id="txt-app-title">Local Online Ekub System</h1>
+    <p id="txt-app-subtitle">Secure Traditional Savings Managed Digitally with Penalty Enforcement</p>
+</header>
+
+<!-- NAVIGATION BAR WITH MULTILINGUAL CONTROLLER -->
+<nav>
+    <div class="nav-links">
+        <a id="nav-home" class="active" onclick="switchTab('home')">🏠 Home Dashboard</a>
+        <a id="nav-about" onclick="switchTab('about')">ℹ️ About Ekub</a>
+        <a id="nav-contact" onclick="switchTab('contact')">📞 Contact Support</a>
+    </div>
+    <div class="lang-picker-box">
+        <span>🌐 Language / ቋንቋ / Afaan:</span>
+        <select id="langSelect" class="lang-select" onchange="changeLanguageSystem(this.value)">
+            <option value="en">English</option>
+            <option value="am">አማርኛ (Amharic)</option>
+            <option value="om">Afaan Oromoo</option>
+        </select>
+    </div>
+</nav>
+
+<!-- ================= HOME SECTION ================= -->
+<div id="section-home" class="content-section active-section">
+    <div class="main-container">
+        <!-- LEFT SIDE: USER REGISTRATION -->
+        <div class="card">
+            <h2 id="lbl-form-title">Create New Account / Sign Up</h2>
+            
+            <!-- Dynamic Rule Information Board -->
+            <div id="lbl-deadline-rules" class="deadline-banner">
+                📅 Rule: Payment day is only Saturday afternoon (12:00 PM – 5:00 PM / ከቀኑ 6:00 – 11:00 ሰዓት). Submissions outside this window attract a 10% penalty.
+            </div>
+
+            <form id="ekubForm">
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label id="lbl-fname" for="firstName">First Name</label>
+                        <input type="text" id="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label id="lbl-mname" for="middleName">Middle Name</label>
+                        <input type="text" id="middleName" required>
+                    </div>
+                    <div class="form-group">
+                        <label id="lbl-lname" for="lastName">Last Name</label>
+                        <input type="text" id="lastName" required>
+                    </div>
+                </div>
+
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label id="lbl-uname" for="username">Username</label>
+                        <input type="text" id="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label id="lbl-phone" for="phone">Phone Number</label>
+                        <input type="tel" id="phone" required placeholder="09xxxxxxxx" pattern="[0-9]{10}">
+                        <span id="hint-phone" class="hint">10 digits (e.g. 0942445517)</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label id="lbl-email" for="email">Email Address</label>
+                    <input type="email" id="email">
+                </div>
+
+                <div class="form-row-2">
+                    <div class="form-group">
+                        <label id="lbl-ekubtype" for="ekubType">Ekub Type / Cycle</label>
+                        <select id="ekubType" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label id="lbl-amount" for="amount">Contribution Amount (Birr)</label>
+                        <input type="number" id="amount" required min="500" max="1000" value="500">
+                        <span id="amountHint" class="hint">Allowed range: 500 up to 1000 Birr</span>
+                    </div>
+                </div>
+
+                <!-- SYSTEM AUTOMATED TRACKING NOTICE BOX -->
+                <div id="penaltyAlertContainer" class="penalty-status-alert">
+                    <span id="lbl-penalty-status-txt">🔍 Analyzing System Submission Clock...</span>
+                </div>
+
+                <div class="summary-box">
+                    <div class="summary-item">
+                        <span id="lbl-sm-base">Base Contribution:</span>
+                        <span><span id="baseDisplay">500</span> Birr</span>
+                    </div>
+                    <div class="summary-item">
+                        <span id="lbl-sm-penalty">Late Penalty Fee (0.5%):</span>
+                        <span class="penalty-txt"><span id="penaltyDisplay">0</span> Birr</span>
+                    </div>
+                    <div class="summary-item total">
+                        <span id="lbl-sm-total">Total Payment Due:</span>
+                        <span><span id="totalDueDisplay">500</span> Birr</span>
+                    </div>
+                    <div class="summary-item" style="margin-top: 10px; color: #2e7d32; font-weight: 600;">
+                        <span id="lbl-sm-payout">Expected Final Payout (100x):</span>
+                        <span><span id="payoutCalculated">50,000</span> Birr</span>
+                    </div>
+                </div>
+                <br>
+                <button type="submit" id="btn-submit-reg">Register & Join Ekub</button>
+            </form>
+        </div>
+
+        <!-- RIGHT SIDE: LEADER / ADMIN VIEW -->
+        <div class="card admin-section">
+            <h2 id="lbl-admin-title">Admin & Ekub Leader Dashboard</h2>
+            
+            <div id="alarmAlert" class="alarm-banner">
+                <span id="lbl-alarm-alert-heading">🚨 ALERT: New Ekub Registration Detected!</span>
+                <br><span id="alarmDetails" style="font-weight: normal;
+                 font-size: 13px; 
+                 display: block;
+                  margin-top: 5px;"></span>
+                
+                <!-- NEW EMAIL NOTIFICATION DISPATCH VISUALIZER -->
+                <div id="emailSimulatorCard" class="email-simulator-card">
+                    <div class="email-header-line">📤 <strong>To:</strong> phiraadamu17@gmail.com</div>
+                    <div class="email-header-line">✉️ <strong>Subject:</strong> [EKUB-SYSTEM-ALERT] New Registration Verified</div>
+                    <div id="emailMsgContent" class="email-body-box"></div>
+                </div>
+
+                <br><button onclick="dismissAlarm()" id="btn-dismiss-alarm" style="background:white; color:#d32f2f; margin-top:8px; padding:4px 10px; font-size:12px; width:auto; border-radius:4px; font-weight:bold; border:none; cursor:pointer;">Dismiss Alarm</button>
+            </div>
+
+            <h3 id="lbl-table-heading">Registered Members Table</h3>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr>
+                            <th id="th-id">Orderly ID</th>
+                            <th id="th-name">User Identity</th>
+                            <th id="th-contact">Contact Details</th>
+                            <th id="th-status">Plan & Status</th>
+                            <th id="th-paid">Total Paid</th>
+                            <th id="th-payout">Expected Payout</th>
+                        </tr>
+                    </thead>
+                    <tbody id="membersTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= ABOUT SECTION ================= -->
+<div id="section-about" class="content-section">
+    <div class="card">
+        <h2 id="ab-heading">What is the Ekub System?</h2>
+        <p id="ab-description">An <strong>Ekub</strong> is a deeply trusted traditional Ethiopian financial rotation association that serves as an alternative savings mechanism. Instead of relying on formal banking lines, a dedicated group of peers pool their capital together to build up their collective financial growth safely.</p>
+        
+        <div class="info-grid">
+            <div class="card" style="background: #f8f9fa; border-top: 4px solid #2e7d32; margin-bottom:0;">
+                <span class="feature-icon">🔄</span>
+                <h3 id="ab-card1-title">The Rotation Scheme</h3>
+                <p id="ab-card1-desc">Every set interval (either weekly or monthly), members contribute a fixed sum of money. The collected dynamic total lump-sum pool is awarded to one chosen member each turn until everyone wins.</p>
+            </div>
+            <div class="card" style="background: #f8f9fa; border-top: 4px solid #2e7d32; margin-bottom:0;">
+                <span class="feature-icon">⚖️</span>
+                <h3 id="ab-card2-title">Penalty Enforcement</h3>
+                <p id="ab-card2-desc">To preserve collective trust, timely cycles are vital. Missing your cycle deadlines imposes a 10% penalty fee. This extra amount buffers administrative costs and protects group reliability.</p>
+            </div>
+            <div class="card" style="background: #f8f9fa; border-top: 4px solid #2e7d32; margin-bottom:0;">
+                <span class="feature-icon">🛡️</span>
+                <h3 id="ab-card3-title">Digital Orderly Tracking</h3>
+                <p id="ab-card3-desc">Our online portal solves administrative confusion. It instantly creates a digital unique ID sequence track for users, manages billing transparently, and rings real-time alerts for system administrators.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= CONTACT SECTION ================= -->
+<div id="section-contact" class="content-section">
+    <div class="main-container" style="grid-template-columns: 1fr 1fr;">
+        <!-- Left Side Form -->
+        <div class="card">
+            <h2 id="ct-form-title">Send Us a Message</h2>
+            <form id="contactForm">
+                <div class="form-group">
+                    <label id="lbl-ct-name" for="contactName">Full Name</label>
+                    <input type="text" id="contactName" required>
+                </div>
+                <div class="form-group">
+                    <label id="lbl-ct-email" for="contactEmail">Email Address</label>
+                    <input type="email" id="contactEmail" required>
+                </div>
+                <div class="form-group">
+                    <label id="lbl-ct-msg" for="contactMsg">Message / Inquiry</label>
+                    <textarea id="contactMsg" required></textarea>
+                </div>
+                <button type="submit" id="btn-submit-contact">Submit Message</button>
+            </form>
+        </div>
+
+        <!-- Right Side Info Details -->
+        <div class="card" style="background: #e8f5e9; border: 1px solid #c8e6c9;">
+            <h2 id="ct-info-title">Ekub Support Information</h2>
+            <p id="ct-info-desc">Need urgent assistance regarding registration anomalies, payout order details, or late fee waivers? Reach out directly through the support points below.</p>
+            
+            <!-- ADMIN BANK CHANNELS CONSOLIDATED IN ONE PLACE -->
+            <div class="form-group" style="background: #fffde7; 
+            padding: 15px;
+             border-radius: 4px;
+              border: 1px dashed #fbc02d;
+               margin-bottom: 20px;">
+                <h3 id="ct-info-payment" style="color: #f57f17;
+                 font-size: 16px; margin-bottom: 6px;">💰 Official Payment Accounts</h3>
+                <p style="margin-bottom: 0; 
+                font-family: monospace;
+                 font-size: 14px; font-weight: bold;
+                  color: #333; line-height: 1.8;">
+                    Commercial Bank (CBE): 1000543272721 <br>
+                    telebirr Account: 0917317438
+                </p>
+            </div>
+
+            <div class="form-group">
+                <h3 id="ct-info-h1">📍 from every place</h3>
+                <p>Digital Financial Innovations Complex, youn can join us from every country</p>
+            </div>
+            <div class="form-group">
+                <h3 id="ct-info-h2">📞 Telephone Lines</h3>
+                <p>+251 942445517<br>+251 917317438</p>
+            </div>
+            <div class="form-group">
+                <h3 id="ct-info-h3">✉️ Direct Email</h3>
+                <p>support@local-online-ekub.com<br>admin@ekub-system.et</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ================= SYSTEM CORE SCRIPT ================= -->
+<script>
+    let dynamicIdCounter = 1001; 
+    let currentLanguage = 'en';
+    let globalIsLateFlag = false; 
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    const localizationData = {
+        en: {
+            navHome: "🏠 Home Dashboard",
+             navAbout: "ℹ️ About Ekub",
+              navContact: "📞 Contact Support",
+            appTitle: "Local Online Ekub System",
+             appSubtitle: "Secure Traditional Savings Managed Digitally with Penalty Enforcement",
+            formTitle: "Create New Account / Sign Up",
+             fName: "First Name",
+              mName: "Middle Name", 
+              lName: "Last Name",
+            uName: "Username",
+             phone: "Phone Number",
+              phoneHint: "10 digits (e.g. 0942445517)", 
+              email: "Email Address",
+            ekubType: "Ekub Type / Cycle",
+             amount: "Contribution Amount (Birr)", 
+            smBase: "Base Contribution:",
+             smPenalty: "Late Penalty Fee (0.5%):",
+              smTotal: "Total Payment Due:",
+               smPayout: "Expected Final Payout (100x):",
+            btnReg: "Register & Join Ekub", 
+            adminTitle: "Admin & Ekub Leader Dashboard",
+             alarmHeading: "🚨 ALERT: New Ekub Registration Detected!",
+            btnDismiss: "Dismiss Alarm", 
+            tableHeading: "Registered Members Table",
+            thId: "Orderly ID",
+             thName: "User Identity", 
+             thContact: "Contact Details",
+              thStatus: "Plan & Status", 
+              thPaid: "Total Paid", 
+              thPayout: "Expected Payout",
+            weeklyOpt: "Weekly (500 - 1,000 Birr)", 
+            monthlyOpt: "Monthly (1,500 - 5,000 Birr)",
+            rangeWeekly: "Allowed range: 500 up to 1,000 Birr", 
+            rangeMonthly: "Allowed range: 1,500 up to 5,000 Birr",
+            badgeLate: "Late (+0.5% Penalty)", 
+            badgeOnTime: "On Time (Valid Window)",
+             rowIncl: "Incl.", 
+             rowPen: "Penalty",
+            alertSuccess: "🎉 Registration Successful!\n\nWelcome to the Ekub, {name}.\n\nYour Orderly Assigned Ekub ID is: #{id}\nCycle Setup: {type}\nTotal Paid Amount: {total} Birr\nTarget Maturity Payout: {payout} Birr",
+            abHeading: "What is the Ekub System?", 
+            abDesc: "An Ekub is a deeply trusted traditional Ethiopian financial rotation association that serves as an alternative savings mechanism. Instead of relying on formal banking lines, a dedicated group of peers pool their capital together to build up their collective financial growth safely.",
+            abC1Title: "🔄 The Rotation Scheme", 
+            abC1Desc: "Every set interval (either weekly or monthly), members contribute a fixed sum of money. The collected dynamic total lump-sum pool is awarded to one chosen member each turn until everyone wins.",
+            abC2Title: "⚖️ Penalty Enforcement", 
+            abC2Desc: "To preserve collective trust, timely cycles are vital. Missing your cycle deadlines imposes a 10% penalty fee. This extra amount buffers administrative costs and protects group reliability.",
+            abC3Title: "🛡️ Digital Orderly Tracking", 
+            abC3Desc: "Our online portal solves administrative confusion. It instantly creates a digital unique ID sequence track for users, manages billing transparently, and rings real-time alerts for system administrators.",
+            ctFormTitle: "Send Us a Message", 
+            ctName: "Full Name",
+             ctEmail: "Email Address", 
+             ctMsg: "Message / Inquiry",
+              btnContact: "Submit Message",
+            ctInfoTitle: "Ekub Support Information",
+             ctInfoDesc: "Need urgent assistance regarding registration anomalies, payout order details, or late fee waivers? Reach out directly through the support points below.",
+            ctH1: "📍 admin address"
+            , ctH2: "📞 Telephone Lines",
+             ctH3: "✉️ Direct Email",
+            ctSubmitted: "Thank you! Your help request has been dispatched to the Ekub administration team.",
+            phName: "e.g. phira",
+             phMname: "e.g. adamu",
+              phLname: "e.g. shiferaw",
+               phUname: "e.g. phira17", 
+               phEmail: "e.g. phiraadamu@gmail.com (Optional)",
+            phCtName: "Your full identity name", 
+            phCtEmail: "yourname@gmail.com", 
+            phCtMsg: "Describe your technical issues or question here...",
+            alarmMsg: "ID #{id} added for {name}!<br>Payment Status: {status}<br>Total Paid: {paid} Birr (Payout: {payout} Birr).",
+            ctInfoPayment: " Official Payment Accounts",
+            ruleBannerText: " Rule: Payment window is only Saturday afternoon (12:00 PM – 5:00 PM / Local 11 o'clock afternoon). Submissions outside this timeframe attract a mandatory 10% penalty fee.",
+            statusLateNotice: " SYSTEM NOTICE: Registration is OUTSIDE payment hours. A 10% late penalty fee has been applied automatically.",
+            statusOnTimeNotice: " SYSTEM NOTICE: You are within the active Saturday window. Regular base parameters apply."
+        },
+        am: {
+            navHome: "🏠 ዋና ዳሽቦርድ",
+             navAbout: "ℹ️ ስለ ዕቁብ መረጃ", 
+             navContact: "📞 የደንበኞች ድጋፍ",
+            appTitle: "የአካባቢ በይነመረብ ዕቁብ ስርዓት", 
+            appSubtitle: "ባህላዊ ቁጠባን በዘመናዊ ዲጂታል መንገድ ከቅጣት ማስፈጸሚያ ጋር በአስተማማኝ ሁኔታ ያስተዳድሩ",
+            formTitle: "አዲስ አካውንት ይክፈቱ / ይመዝገቡ", 
+            fName: "መጀመሪያ ስም",
+             mName: "የአባት ስም",
+              lName: "የአያት ስም",
+            uName: "የመጠቀሚያ ስም (Username)",
+             phone: "ስልክ ቁጥር", phoneHint: "10 አሃዞች (ምሳሌ፦ 0942445517)",
+              email: "ኢሜይል አድራሻ (ከተፈለገ ብቻ)",
+            ekubType: "የዕቁብ አይነት / ኡደት",
+             amount: "የመዋጮ መጠን (በብር)", 
+            smBase: "ዋና መዋጮ፦",
+             smPenalty: "የዘገየ ቅጣት ክፍያ (0.5%)፦", 
+             smTotal: "አጠቃላይ የሚከፈል ክፍያ፦",
+              smPayout: "የሚጠበቅ የመጨረሻ እጣ (100 እጥፍ)፦",
+            btnReg: "ይመዝገቡ እና እቁቡን ይቀላቀሉ", 
+            adminTitle: "የአስተዳዳሪ እና የዕቁብ ሰብሳቢ ዳሽቦርድ",
+             alarmHeading: "🚨 ማስጠንቀቂያ፦ አዲስ የዕቁብ ምዝገባ ተገኝቷል!",
+            btnDismiss: "ማስጠንቀቂያውን አጥፋ", 
+            tableHeading: "የተመዘገቡ አባላት ሰንጠረዥ",
+            thId: "የምዝገባ መለያ (ID)",
+             thName: "የአባል ማንነት", 
+             thContact: "የእውቂያ ዝርዝር", 
+             thStatus: "እቅድ እና ሁኔታ",
+              thPaid: "አጠቃላይ የተከፈለ",
+               thPayout: "የሚጠበቅ እጣ ክፍያ",
+            weeklyOpt: "ሳምንታዊ (500 - 1,000 ብር)",
+             monthlyOpt: "ወርሃዊ (1,500 - 5,000 ብር)",
+            rangeWeekly: "የተፈቀደ ገደብ፦ ከ500 እስከ 1,000 ብር",
+             rangeMonthly: "የተፈቀደ ገደብ፦ ከ1,500 እስከ 5,000 ብር",
+            badgeLate: "የዘገየ (+10% ቅጣት)", 
+            badgeOnTime: "በወቅቱ የተከፈለ",
+             rowIncl: "ያካተተ", rowPen: "ቅጣት",
+            alertSuccess: "🎉 ምዝገባው ተሳክቷል!\n\nእንኳን ወደ እቁቡ በሰላም መጡ {name}።\n\nየእርስዎ መለያ ቁጥር (ID)፦ #{id} ነው\nየኡደት አይነት፦ {type}\nአጠቃላይ የተከፈለ መጠን፦ {total} ብር\nየሚጠበቅ አጠቃላይ የዕቁብ እጣ፦ {payout} ብር",
+            abHeading: "የዕቁብ ስርዓት ምንድነው?", abDesc: "ዕቁብ በአብዛኛው የኢትዮጵያ ማህበረሰብ ዘንድ በከፍተኛ እምነት ላይ ተመስርቶ የሚተገበር ባህላዊ የገንዘብ ቁጠባ እና መዋጮ ማህበር ነው። መደበኛ የባንክ አሰራሮችን ከመጠበቅ ይልቅ፣ እርስ በርሳቸው የሚተማመኑ የሰዎች ስብስብ ገንዘባቸውን በጋራ በማዋጣት ማህበራዊ እና ኢኮኖሚያዊ እድገታቸውን በጥምረት ያሳድጋሉ።",
+            abC1Title: "🔄 የመክፈያ ኡደት አሰራር", abC1Desc: "በእያንዳንዱ የተወሰነ ጊዜ (ሳምንታዊ ወይም ወርሃዊ)፣ አባላት የተወሰነ ቋሚ የገንዘብ መጠን ያዋጣሉ። የተሰበሰበው አጠቃላይ ገንዘብ በየተራው እጣ ለደረሰው አንድ አባል ሙሉ በሙሉ ይሰጣል። ሁሉም አባል እጣው እስኪደርሰው ድረስ ኡደቱ ይቀጥላል።",
+            abC2Title: "⚖️ የቅጣት ደንብ ማስፈጸም", abC2Desc: "የአባላቱን የጋራ እምነት እና ታማኝነት ለመጠበቅ፣ ክፍያን በወቅቱ መክፈል ወሳኝ ነው። የክፍያ ቀነ-ገደብ ማለፍ የ10% ቅጣት ያስከትላል። ይህ ተጨማሪ ክፍያ የአስተዳደር ወጪዎችን ለመሸፈን እና የቡድኑን አስተማማኝነት ለመጠበቅ ይረዳል።",
+            abC3Title: "🛡️ ዲጂታል መለያ ክትትል", abC3Desc: "ይህ የበይነመረብ ዌብሳይት የአስተዳደር መደራረብን ያስቀራል። ለእያንዳንዱ ተጠቃሚ ልዩ የዲጂታል መለያ ቁጥር (ID) ሰንሰለት ወዲያውኑ ይፈጥራል፣ የክፍያ ግልፅነትን ያረጋግጣል፣ እና አዲስ ሰው ሲመዘገብ ለአስተዳዳሪው የድምፅ ማስጠንቀቂያ ይልካል።",
+            ctFormTitle: "መልዕክት ይላኩልን", 
+            ctName: "ሙሉ ስም",
+             ctEmail: "ኢሜይል አድራሻ", 
+             ctMsg: "መልዕክት / ጥያቄ",
+              btnContact: "መልዕክት ላክ",
+            ctInfoTitle: "የዕቁብ ድጋፍ ሰጪ መረጃ", 
+            ctInfoDesc: "ምዝገባን፣ የእጣ ቅደም ተከተልን ወይም የቅጣት ክፍያ መቅረትን በተመለከተ አስቸኳይ ድጋፍ ይፈልጋሉ? ከታች ባሉት አድራሻዎች ቀጥታ ያግኙን።",
+            ctH1: "📍 ዋና መስሪያ ቤት",
+             ctH2: "📞 የስልክ መስመሮች", 
+             ctH3: "✉️ ቀጥታ ኢሜይል",
+            ctSubmitted: "እናመሰግናለን! የድጋፍ ጥያቄዎ ለዕቁብ አስተዳደር ቡድን ተልኳል።",
+            phName: "ምሳሌ፦ phira",
+             phMname: "ምሳሌ፦ adamu",
+              phLname: "ምሳሌ፦ shiferaw",
+               phUname: "ምሳሌ፦ phira1799", 
+               phEmail: "ምሳሌ፦ phira17@gamail.com (አማራጭ)",
+            phCtName: "ሙሉ ስምዎን እዚህ ያስገቡ",
+             phCtEmail: "yourname@gmail.com",
+              phCtMsg: "የቴክኒክ ችግርዎን ወይም ጥያዎን እዚህ ይግለጹ...",
+            alarmMsg: "መለያ ቁጥር #{id} ለ{name} ተጨምሯል!<br>የክፍያ ሁኔታ፦ {status}<br>አጠቃላይ የተከፈለ፦ {paid} ብር (የሚደርሰው እጣ፦ {payout} ብር)።",
+            ctInfoPayment: " ይፋዊ የሂሳብ ቁጥሮች",
+            ruleBannerText: "📅 ደንብ፡ የመክፈያ ቀን ቅዳሜ ከሰዓት በኋላ (ከቀኑ 6:00 እስከ ቀኑ 11:00 ሰዓት) ብቻ ነው። ከዚህ ሰዓት ውጭ የሚደረጉ ምዝገባዎች የ10% ቅጣት ያስከትላሉ።",
+            statusLateNotice: " የስርዓት ማሳሰቢያ፡ ክፍያ የሚፈጽሙት ከቅዳሜ የሰዓት ገደብ ውጪ በመሆኑ የ10% ቅጣት በራስ-ሰር ታስቧል።",
+            statusOnTimeNotice: " የስርዓት ማሳሰቢያ፡ በትክክለኛው የቅዳሜ ክፍያ ሰዓት መስኮት ውስጥ ይገኛሉ። ተጨማሪ ቅጣት የለብዎትም።"
+        },
+        om: {
+            navHome: "🏠 Daashboordii Muummee",
+             navAbout: "ℹ️ Waayee Equubii",
+              navContact: "📞 Deeggarsa Argachuuf",
+            appTitle: "Sirna Equubii Interneetii Naannoo", 
+            appSubtitle: "Qusannoo Aadaa Akkaataa Ammayyaa Fi Dijitaala Ta'een Sirna Adabiin Walqabsiisanii Bulchuuf",
+            formTitle: "Akkaawuntii Haaraa Banadhu / Galmaayi",
+             fName: "Maqaa Duraa",
+              mName: "Maqaa Abbaa",
+               lName: "Maqaa Akaakayyuu",
+            uName: "Maqaa Fayyadamaa (Username)",
+             phone: "Lakkofsa Bilbilaa",
+              phoneHint: "Lakkoofsota 10 (Fkn. 0942445517)",
+               email: "Teessoo Imeelii (Filannoo)",
+            ekubType: "Gosa Equubii / Naannoo", 
+            amount: "Buusii Maallaqaa (Birrii)", 
+            smBase: "Buusii Bu'uuraa:",
+             smPenalty: "Kaffaltii Adaba Turee (%0.5):", 
+             smTotal: "Waliigala Kaffaltii:",
+              smPayout: "Kaffaltii Miltoof Eeggamu (Waliigala x100):",
+            btnReg: "Galmaayi & Equubitti Dabalami", 
+            adminTitle: "Daashboordii Bulchaa Fi Walitti Qabaa Equubii",
+             alarmHeading: "🚨 namni tokko: galmaa'eera!",
+            btnDismiss: "Balaaqama Dhaamsi",
+             tableHeading: "Gabatee Miseensota Galmaayan",
+            thId: "Eenyummeessa (ID)", 
+            thName: "Eenyummaa Miseensaa",
+             thContact: "Quunnamtii", 
+             thStatus: "Karroora Fi Haala",
+              thPaid: "Waliigala Kaffalame",
+               thPayout: "Kaffaltii Eeggamu",
+            weeklyOpt: "Torbanitti (500 - 1,000 Birrii)",
+             monthlyOpt: "Ji'atti (1,500 - 5,000 Birrii)",
+            rangeWeekly: "Daangaa eyyamame: 500 hanga 1,000 Birrii", 
+            rangeMonthly: "Daangaa eyyamame: 1,500 hanga 5,000 Birrii",
+            badgeLate: "Kan Ture (+%0.5 Adaba)",
+             badgeOnTime: "Yeroon Kaffalame", 
+             
+             rowIncl: "Kan dabalate",
+              rowPen: "Adaba",
+            alertSuccess: "🎉 Galmeen Milkaa'eera!\n\nBaga gara Equubii nagaan dhuftan {name}.\n\nLakkofsa Eenyummeessa (ID) keessan: #{id}\nGosa Naannoo: {type}\nWaliigala Maallaqa Kaffalame: {total} Birrii\nKaffaltii Guddina Eeggamu: {payout} Birrii",
+            abHeading: "Sirni Equubii Maali?", 
+            abDesc: "Equubiin waldaa maallaqaa aadaa Itoophiyaa keessatti amantii guddaa irratti hundamaa'ee hojjetu fi akka tooftaa qusannoo filannootti tajaajiluudha. Toora baankii idilee eeggachuu mannaa, namoonni waliif amantii qaban maallaqa isaanii walitti fidanii guddina dinagdee waliinii ijaaru.",
+            abC1Title: "🔄 Sirna Naannoo Kaffaltii",
+             abC1Desc: "Yeroo murtaa'e gidduutti (torbanitti ykn ji'an), miseensonni maallaqa daangeffame walitti buusu. Maallaqni walitti qabame sun carraan nama gaheef guutummaatti kennama. Miseensi hundi hamma carraan qaqququtti sirni kun itti fufa.",
+            abC2Title: "⚖️ Adaba Raawwachiisuu",
+             abC2Desc: "Amantii waliinii eeguuf, yeroon kaffaluun baay'ee murteessaadha. Daangaa yeroo dabarsuun adaba %10 fida. Maallaqni dabalataa kun baasii bulchiinsaa uwwisuuf fi jabiina garee eeguuf gargaara.",
+            abC3Title: "🛡️ Hordoffii Dijitaalaa",
+             abC3Desc: "Toorri interneetii kun burjaajii bulchiinsaa maqsa. Fayyadamtootaaf battalatti ID addaa uuma, dhimma kaffaltii ifa godha, akkasumas namni haaraan yoo galmaahu bilbila bulchaatiif sagalee eeggannoo uuma.",
+            ctFormTitle: "Ergaa Nuuf Ergaa",
+             ctName: "Maqaa Guutuu",
+              ctEmail: "Teessoo Imeelii",
+               ctMsg: "Ergaa / Gaaffii",
+                btnContact: "Ergaa Ergi",
+            ctInfoTitle: "Odeeffannoo Deeggarsa Equubii", 
+            ctInfoDesc: "Gargaarsi ariifachiisaan galmeen walqabatu, tartiiba kaffaltii ykn dhiifama adabaa isin barbaachisaa? Kallattiin karaa hordoffii gadii nu quunnamaa.",
+            ctH1: "📍 iddoo gaggeessan jiru", 
+            ctH2: "📞 Sarara Bilbilaa",
+             ctH3: "✉️ Imeelii Kallattii",
+            ctSubmitted: "Galatoomaa! Gaaffiin keessan garee bulchiinsa equubitiif ergameera.",
+            phName: "Fkn. phira",
+             phMname: "Fkn. adamu", 
+             phLname: "Fkn. shiferaw", 
+             phUname: "Fkn. phira17", 
+             phEmail: "Fkn. phira17@gmail.com (Filannoo)",
+            phCtName: "Maqaa guutuu keessan galchaa", 
+            phCtEmail: "yourname@gmail.com",
+             phCtMsg: "Rakkoo keessan asitti ibsaa...",
+            alarmMsg: "Lakk ID #{id} kan kanaan dabalame {name}!<br>Haala Kaffaltii: {status}<br>Waliigala Kaffalame: {paid} Birrii (Eeggamu: {payout} Birrii).",
+            ctInfoPayment: " Lakkoofsa Herrega Kaffaltii",
+            ruleBannerText: "📅 Seera: Yeroon kaffaltii guyyaa Sanbata Durbaa (Wixineen sa'aatii 6:00 - 11:00 booda xiqqoo) qofa. Sa'aatii kanatanii alatti adaba %10 fida.",
+            statusLateNotice: " ERGAA SIRNAA: Galmeen sa'aatii eyyamamee alatti raawwatame. Adabni %10 ofiisaan itti dabalameera.",
+            statusOnTimeNotice: " ERGAA SIRNAA: Sa'aatii Sanbata sirrii keessa jirtu. Adabni dabalataa hin jiru."
+        }
+    };
+
+    const ekubForm = document.getElementById('ekubForm');
+    const ekubTypeSelect = document.getElementById('ekubType');
+    const amountInput = document.getElementById('amount');
+    const amountHint = document.getElementById('amountHint');
+    
+    const penaltyAlertContainer = document.getElementById('penaltyAlertContainer');
+    const baseDisplay = document.getElementById('baseDisplay');
+    const penaltyDisplay = document.getElementById('penaltyDisplay');
+    const totalDueDisplay = document.getElementById('totalDueDisplay');
+    const payoutCalculated = document.getElementById('payoutCalculated');
+
+    const alarmAlert = document.getElementById('alarmAlert');
+    const alarmDetails = document.getElementById('alarmDetails');
+    const emailSimulatorCard = document.getElementById('emailSimulatorCard');
+    const emailMsgContent = document.getElementById('emailMsgContent');
+    const membersTableBody = document.getElementById('membersTableBody');
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.content-section').forEach(sec => sec.classList.remove('active-section'));
+        document.querySelectorAll('nav a').forEach(lnk => lnk.classList.remove('active'));
+        
+        document.getElementById(`section-${tabName}`).classList.add('active-section');
+        document.getElementById(`nav-${tabName}`).classList.add('active');
+    }
+
+    function evaluateSubmissionDeadlineStatus() {
+        const now = new Date();
+        const dayOfWeek = now.getDay(); 
+        const currentHour = now.getHours(); 
+
+        if (dayOfWeek === 6 && currentHour >= 12 && currentHour < 17) {
+            globalIsLateFlag = false;
+        } else {
+            globalIsLateFlag = true;
+        }
+    }
+
+    function changeLanguageSystem(lang) {
+        currentLanguage = lang;
+        const data = localizationData[lang];
+
+        document.getElementById('nav-home').innerHTML = data.navHome;
+        document.getElementById('nav-about').innerHTML = data.navAbout;
+        document.getElementById('nav-contact').innerHTML = data.navContact;
+        document.getElementById('txt-app-title').textContent = data.appTitle;
+        document.getElementById('txt-app-subtitle').textContent = data.appSubtitle;
+
+        document.getElementById('lbl-form-title').textContent = data.formTitle;
+        document.getElementById('lbl-deadline-rules').textContent = data.ruleBannerText;
+        document.getElementById('lbl-fname').textContent = data.fName;
+        document.getElementById('lbl-mname').textContent = data.mName;
+        document.getElementById('lbl-lname').textContent = data.lName;
+        document.getElementById('lbl-uname').textContent = data.uName;
+        document.getElementById('lbl-phone').textContent = data.phone;
+        document.getElementById('hint-phone').textContent = data.phoneHint;
+        document.getElementById('lbl-email').textContent = data.email;
+        document.getElementById('lbl-ekubtype').textContent = data.ekubType;
+        document.getElementById('lbl-amount').textContent = data.amount;
+
+        document.getElementById('firstName').placeholder = data.phName;
+        document.getElementById('middleName').placeholder = data.phMname;
+        document.getElementById('lastName').placeholder = data.phLname;
+        document.getElementById('username').placeholder = data.phUname;
+        document.getElementById('email').placeholder = data.phEmail;
+
+        document.getElementById('lbl-sm-base').textContent = data.smBase;
+        document.getElementById('lbl-sm-penalty').textContent = data.smPenalty;
+        document.getElementById('lbl-sm-total').textContent = data.smTotal;
+        document.getElementById('lbl-sm-payout').textContent = data.smPayout;
+        document.getElementById('btn-submit-reg').textContent = data.btnReg;
+
+        document.getElementById('lbl-admin-title').textContent = data.adminTitle;
+        document.getElementById('lbl-alarm-alert-heading').textContent = data.alarmHeading;
+        document.getElementById('btn-dismiss-alarm').textContent = data.btnDismiss;
+        document.getElementById('lbl-table-heading').textContent = data.tableHeading;
+
+        document.getElementById('th-id').textContent = data.thId;
+        document.getElementById('th-name').textContent = data.thName;
+        document.getElementById('th-contact').textContent = data.thContact;
+        document.getElementById('th-status').textContent = data.thStatus;
+        document.getElementById('th-paid').textContent = data.thPaid;
+        document.getElementById('th-payout').textContent = data.thPayout;
+
+        document.getElementById('ab-heading').textContent = data.abHeading;
+        document.getElementById('ab-description').textContent = data.abDesc;
+        document.getElementById('ab-card1-title').textContent = data.abC1Title;
+        document.getElementById('ab-card1-desc').textContent = data.abC1Desc;
+        document.getElementById('ab-card2-title').textContent = data.abC2Title;
+        document.getElementById('ab-card2-desc').textContent = data.abC2Desc;
+        document.getElementById('ab-card3-title').textContent = data.abC3Title;
+        document.getElementById('ab-card3-desc').textContent = data.abC3Desc;
+
+        document.getElementById('ct-form-title').textContent = data.ctFormTitle;
+        document.getElementById('lbl-ct-name').textContent = data.ctName;
+        document.getElementById('lbl-ct-email').textContent = data.ctEmail;
+        document.getElementById('lbl-ct-msg').textContent = data.ctMsg;
+        document.getElementById('btn-submit-contact').textContent = data.btnContact;
+        document.getElementById('ct-info-title').textContent = data.ctInfoTitle;
+        document.getElementById('ct-info-desc').textContent = data.ctInfoDesc;
+        document.getElementById('ct-info-h1').textContent = data.ctH1;
+        document.getElementById('ct-info-h2').textContent = data.ctH2;
+        document.getElementById('ct-info-h3').textContent = data.ctH3;
+        document.getElementById('ct-info-payment').textContent = data.ctInfoPayment;
+
+        document.getElementById('contactName').placeholder = data.phCtName;
+        document.getElementById('contactEmail').placeholder = data.phCtEmail;
+        document.getElementById('contactMsg').placeholder = data.phCtMsg;
+
+        const savedType = ekubTypeSelect.value || 'weekly';
+        ekubTypeSelect.innerHTML = `
+            <option value="weekly">${data.weeklyOpt}</option>
+            <option value="monthly">${data.monthlyOpt}</option>
+        `;
+        ekubTypeSelect.value = savedType;
+
+        if (savedType === 'weekly') {
+            amountHint.textContent = data.rangeWeekly;
+        } else {
+            amountHint.textContent = data.rangeMonthly;
+        }
+
+        calculateStatement();
+    }
+
+    ekubTypeSelect.addEventListener('change', function() {
+        const data = localizationData[currentLanguage];
+        if (this.value === 'weekly') {
+            amountInput.min = 500; amountInput.max = 1000;
+            if(amountInput.value < 500 || amountInput.value > 1000) amountInput.value = 500;
+            amountHint.textContent = data.rangeWeekly;
+        } else {
+            amountInput.min = 1500; amountInput.max = 5000;
+            if(amountInput.value < 1500 || amountInput.value > 5000) amountInput.value = 1500;
+            amountHint.textContent = data.rangeMonthly;
+        }
+        calculateStatement();
+    });
+
+    amountInput.addEventListener('input', calculateStatement);
+
+    function calculateStatement() {
+        evaluateSubmissionDeadlineStatus(); 
+        const data = localizationData[currentLanguage];
+        
+        const baseAmt = parseFloat(amountInput.value) || 0;
+        let penalty = 0;
+        
+        if (globalIsLateFlag) {
+            penalty = baseAmt * 0.10; 
+            penaltyAlertContainer.className = "penalty-status-alert active-fine";
+            penaltyAlertContainer.textContent = data.statusLateNotice;
+        } else {
+            penalty = 0;
+            penaltyAlertContainer.className = "penalty-status-alert good-standing";
+            penaltyAlertContainer.textContent = data.statusOnTimeNotice;
+        }
+        
+        const totalDue = baseAmt + penalty;
+        const maturityPayout = baseAmt * 100; 
+
+        baseDisplay.textContent = baseAmt.toLocaleString();
+        penaltyDisplay.textContent = penalty.toLocaleString();
+        totalDueDisplay.textContent = totalDue.toLocaleString();
+        payoutCalculated.textContent = maturityPayout.toLocaleString();
+    }
+
+    function playAlarmSound() {
+        if (!audioCtx) return;
+        let osc = audioCtx.createOscillator();
+        let gain = audioCtx.createGain();
+        osc.type = "sawtooth";
+        osc.frequency.value = 850; 
+        gain.gain.setValueAtTime(0.5, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8); 
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + 0.8);
+    }
+
+    ekubForm.onsubmit = function(e) {
+        e.preventDefault();
+        calculateStatement(); 
+        const data = localizationData[currentLanguage];
+
+        const fname = document.getElementById('firstName').value;
+        const mname = document.getElementById('middleName').value;
+        const lname = document.getElementById('lastName').value;
+        const uname = document.getElementById('username').value;
+        const phone = document.getElementById('phone').value;
+        const emailInputVal = document.getElementById('email').value.trim();
+        const email = emailInputVal ? emailInputVal : "—";
+        
+        const type = ekubTypeSelect.value;
+        const baseAmt = parseFloat(amountInput.value);
+        
+        const isLate = globalIsLateFlag;
+        const penaltyFee = isLate ? (baseAmt * 0.10) : 0;
+        const totalPaid = baseAmt + penaltyFee;
+        const expectedPayout = baseAmt * 100;
+        const currentAssignedId = dynamicIdCounter;
+
+        const statusLabelText = isLate ? data.badgeLate : data.badgeOnTime;
+        const badgeClass = isLate ? 'danger' : 'success';
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><strong>#${currentAssignedId}</strong></td>
+            <td>
+                <strong>${fname} ${mname} ${lname}</strong>
+                <span class="secondary-info">👤 @${uname}</span>
+            </td>
+            <td>
+                📞 ${phone}
+                <span class="secondary-info">✉️ ${email}</span>
+            </td>
+            <td style="text-transform: capitalize;">
+                ${type === 'weekly' ? (currentLanguage === 'en' ? 'Weekly' : currentLanguage === 'am' ? 'ሳምንታዊ' : 'Torbanitti') : (currentLanguage === 'en' ? 'Monthly' : currentLanguage === 'am' ? 'ወርሃዊ' : 'Ji\'atti')} <br> 
+                <span class="badge ${badgeClass}">${statusLabelText}</span>
+            </td>
+            <td>
+                <strong>${totalPaid.toLocaleString()} Birr</strong>
+                ${isLate ? `<span class="secondary-info penalty-txt">${data.rowIncl}. ${penaltyFee.toLocaleString()} ${data.rowPen}</span>` : ''}
+            </td>
+            <td style="color:#81c784; font-weight:bold;">${expectedPayout.toLocaleString()} Birr</td>
+        `;
+        membersTableBody.appendChild(row);
+
+        let localizedStatusAlert = isLate ? `⚠️ ${data.badgeLate}` : `✅ ${data.badgeOnTime}`;
+        let computedAlarmString = data.alarmMsg
+            .replace('{id}', currentAssignedId)
+            .replace('{name}', `${fname} ${lname}`)
+            .replace('{status}', localizedStatusAlert)
+            .replace('{paid}', totalPaid.toLocaleString())
+            .replace('{payout}', expectedPayout.toLocaleString());
+
+        alarmDetails.innerHTML = computedAlarmString;
+
+        // GENERATING THE EMAIL CONTENT MESSAGE DYNAMICALLY FOR THE ADMIN POPOUT
+        const rawEmailMessageText = 
+`==================================================
+[ALERT] NEW ONLINE EKUB TRANSACTION RECORDED
+==================================================
+Orderly Sequence ID: #${currentAssignedId}
+Depositor Name: ${fname} ${mname} ${lname}
+Account Username: @${uname}
+Verified Contact: ${phone}
+
+Cycle Setup Scheme: ${type.toUpperCase()}
+Base Contribution: ${baseAmt} Birr
+Window Penalty Added: ${penaltyFee} Birr
+--------------------------------------------------
+TOTAL COMPLETED PAYMENT: ${totalPaid} Birr
+TARGET MATURITY PAYOUT: ${expectedPayout} Birr
+--------------------------------------------------
+Status Audit Window: ${isLate ? "LATE DEPOSIT (10% PENALTY INCLUDED)" : "ON TIME"}
+Timestamp Log: ${new Date().toLocaleString()}
+==================================================`;
+
+        // Render to simulated dashboard panel box
+        emailMsgContent.textContent = rawEmailMessageText;
+        emailSimulatorCard.style.display = "block";
+        alarmAlert.style.display = "block";
+        playAlarmSound();
+
+        // NATIVE POPUP DIALOG PACKED WITH FULL CONTENT
+        let coreAlertOutputString = 
+`📧 [ADMIN ALERT SENT TO: phiraadamu17@gmail.com]\n\n` + 
+`Message Context Data:\n` +
+`----------------------------------------\n` +
+`• Orderly ID: #${currentAssignedId}\n` +
+`• Member Identity: ${fname} ${mname} ${lname}\n` +
+`• Setup Plan Cycle: ${type.toUpperCase()}\n` +
+`• Paid Total: ${totalPaid.toLocaleString()} Birr\n` +
+`• Final Pool Payout: ${expectedPayout.toLocaleString()} Birr\n` +
+`• Payment Window Status: ${isLate ? "LATE (10% Fee Applied)" : "VALID ON-TIME WINDOW"}\n` +
+`----------------------------------------\n\n` + 
+data.alertSuccess
+    .replace('{name}', `${fname} ${mname} ${lname}`)
+    .replace('{id}', currentAssignedId)
+    .replace('{type}', type.toUpperCase())
+    .replace('{total}', totalPaid.toLocaleString())
+    .replace('{payout}', expectedPayout.toLocaleString());
+
+        alert(coreAlertOutputString);
+
+        dynamicIdCounter++;
+        ekubForm.reset();
+        ekubTypeSelect.value = 'weekly'; 
+        ekubTypeSelect.dispatchEvent(new Event('change'));
+    };
+
+    function dismissAlarm() {
+        alarmAlert.style.display = "none";
+        emailSimulatorCard.style.display = "none";
+    }
+
+    document.getElementById('contactForm').onsubmit = function(e){
+        e.preventDefault();
+        alert(localizationData[currentLanguage].ctSubmitted);
+        this.reset();
+    };
+
+    window.addEventListener('DOMContentLoaded', () => {
+        changeLanguageSystem('en');
+    });
+</script>
+
+</body>
+</html>
